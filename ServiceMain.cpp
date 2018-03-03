@@ -77,9 +77,9 @@ VOID WINAPI ServiceMain (DWORD argc, LPTSTR *argv)
         g_ServiceStatus.dwCheckPoint = 1;
 
         if (SetServiceStatus (g_StatusHandle, &g_ServiceStatus) == FALSE)
-	    {
-		    OutputDebugString(_T("SampleMonitor: ServiceMain: SetServiceStatus returned error"));
-	    }
+        {
+            OutputDebugString(_T("SampleMonitor: ServiceMain: SetServiceStatus returned error"));
+	}
         goto EXIT; 
     }    
 
@@ -91,7 +91,7 @@ VOID WINAPI ServiceMain (DWORD argc, LPTSTR *argv)
 
     if (SetServiceStatus (g_StatusHandle, &g_ServiceStatus) == FALSE)
     {
-	    OutputDebugString(_T("SampleMonitor: ServiceMain: SetServiceStatus returned error"));
+	OutputDebugString(_T("SampleMonitor: ServiceMain: SetServiceStatus returned error"));
     }
 
     // Start the thread that will perform the main task of the service
@@ -118,7 +118,7 @@ VOID WINAPI ServiceMain (DWORD argc, LPTSTR *argv)
 
     if (SetServiceStatus (g_StatusHandle, &g_ServiceStatus) == FALSE)
     {
-	    OutputDebugString(_T("SampleMonitor: ServiceMain: SetServiceStatus returned error"));
+        OutputDebugString(_T("SampleMonitor: ServiceMain: SetServiceStatus returned error"));
     }
     
     EXIT:
@@ -133,7 +133,7 @@ VOID WINAPI ServiceCtrlHandler (DWORD CtrlCode)
     OutputDebugString(_T("SampleMonitor: ServiceCtrlHandler: Entry"));
 
     switch (CtrlCode) 
-	{
+    {
      case SERVICE_CONTROL_STOP :
 
         OutputDebugString(_T("SampleMonitor: ServiceCtrlHandler: SERVICE_CONTROL_STOP Request"));
@@ -150,9 +150,9 @@ VOID WINAPI ServiceCtrlHandler (DWORD CtrlCode)
         g_ServiceStatus.dwCheckPoint = 4;
 
         if (SetServiceStatus (g_StatusHandle, &g_ServiceStatus) == FALSE)
-		{
-			OutputDebugString(_T("SampleMonitor: ServiceCtrlHandler: SetServiceStatus returned error"));
-		}
+	{
+	    OutputDebugString(_T("SampleMonitor: ServiceCtrlHandler: SetServiceStatus returned error"));
+	}
 
         // This will signal the worker thread to start shutting down
         SetEvent (g_ServiceStopEvent);
@@ -171,36 +171,36 @@ DWORD WINAPI ServiceWorkerThread (LPVOID lpParam)
 {
     OutputDebugString(_T("SampleMonitor: ServiceWorkerThread: Entry"));
 
-	SC_HANDLE serviceDbHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-	SC_HANDLE serviceHandle = OpenService(serviceDbHandle, _T("Sample"), SC_MANAGER_ALL_ACCESS);
+    SC_HANDLE serviceDbHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+    SC_HANDLE serviceHandle = OpenService(serviceDbHandle, _T("Sample"), SC_MANAGER_ALL_ACCESS);
 
     //  Periodically check if the service has been requested to stop
     while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
     {        
-		SERVICE_STATUS_PROCESS status;
-		DWORD bytesNeeded;
-		QueryServiceStatusEx(serviceHandle, SC_STATUS_PROCESS_INFO, (LPBYTE)&status,
-			                 sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded);
+	SERVICE_STATUS_PROCESS status;
+	DWORD bytesNeeded;
+	QueryServiceStatusEx(serviceHandle, SC_STATUS_PROCESS_INFO, (LPBYTE)&status,
+			     sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded);
 
-		if (status.dwCurrentState == SERVICE_STOPPED)
-		{
-			BOOL b = StartService(serviceHandle, NULL, NULL);
-			if (b)
-			{
-				OutputDebugString(_T("SampleMonitor: Service started."));
-			}
-			else
-			{
-				OutputDebugString(_T("SampleMonitor: Service failed to start."));
-			}
-		}
+	if (status.dwCurrentState == SERVICE_STOPPED)
+	{
+	    BOOL b = StartService(serviceHandle, NULL, NULL);
+	    if (b)
+	    {
+		 OutputDebugString(_T("SampleMonitor: Service started."));
+	    }
+	    else
+	    {
+		OutputDebugString(_T("SampleMonitor: Service failed to start."));
+	    }
+	}
 
         //  Simulate some work by sleeping
         Sleep(60000);
     }
 
-	CloseServiceHandle(serviceHandle);
-	CloseServiceHandle(serviceDbHandle);
+    CloseServiceHandle(serviceHandle);
+    CloseServiceHandle(serviceDbHandle);
 
     OutputDebugString(_T("SampleMonitor: ServiceWorkerThread: Exit"));
 
